@@ -1,0 +1,19 @@
+node('master') {
+    stage('ContinuousDownload') {
+        git branch: 'main', url: 'https://github.com/sagarchaaro/Maven.git'
+    }
+    stage('ContinuousBuild') {
+        sh 'mvn package'
+    }
+    stage('ContinuousDeployment') {
+       sh 'scp /home/ubuntu/.jenkins/workspace/ScriptedPipeline_Latest/webapp/target/webapp.war ubuntu@172.31.39.181:/var/lib/tomcat9/webapps/testsag.war'
+    }
+    stage('ContinuousTesting') {
+        git branch: 'main', url: 'https://github.com/sagarchaaro/FunctionalTesting.git'
+        sh 'java -jar /home/ubuntu/.jenkins/workspace/Testing/testing.jar'
+    }
+    stage('ContinuousDelivery') {
+        input 'Waiting for Approval from DM!'
+       sh 'scp /home/ubuntu/.jenkins/workspace/ScriptedPipeline_Latest/webapp/target/webapp.war ubuntu@172.31.34.222:/var/lib/tomcat9/webapps/testaaro.war'
+    }
+}
