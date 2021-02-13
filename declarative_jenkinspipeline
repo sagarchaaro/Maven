@@ -1,0 +1,31 @@
+pipeline{
+    agent any
+    stages{
+        stage('Continuous_Downlaoad'){
+            steps{
+                git branch: 'main', url: 'https://github.com/sagarchaaro/Maven.git'
+            }
+        }
+        stage('Continuous_Build'){
+            steps{
+                sh 'mvn package'
+            }
+        }
+        stage('Continuous_Deployment'){
+            steps{
+                sh 'scp /home/ubuntu/.jenkins/workspace/ScriptedPipeline_Latest/webapp/target/webapp.war ubuntu@172.31.39.181:/var/lib/tomcat9/webapps/testsag.war'
+            }
+        }
+        stage('Continuous_Testing'){
+            steps{
+                git branch: 'main', url: 'https://github.com/sagarchaaro/FunctionalTesting.git'
+                sh 'java -jar /home/ubuntu/.jenkins/workspace/Testing/testing.jar'
+            }
+        }
+        stage('Continuous_Delivery'){
+            steps{
+                sh 'scp /home/ubuntu/.jenkins/workspace/ScriptedPipeline_Latest/webapp/target/webapp.war ubuntu@172.31.34.222:/var/lib/tomcat9/webapps/testaaro.war'
+            }
+        }
+    }
+}
