@@ -1,7 +1,7 @@
 node('master') {
    
    stage('ContinuousDownload') {
-      git branch: 'main', url: 'https://github.com/sagarchaaro/Maven.git'
+      git branch: 'main', url: 'https://github.com/sagarchaaro/Maventest_sagar.git'
     }
      stage('ContinuousBuild') {
       sh 'mvn package'
