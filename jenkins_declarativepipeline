@@ -16,7 +16,7 @@ pipeline{
         }
         stage('Continuous_Build'){
             steps{
-                scrpt{
+                script{
                     try{
                         sh 'mvn package'    
                     }catch(Exception e){
@@ -43,26 +43,13 @@ pipeline{
 				script{
 					try{
 						git branch: 'main', url: 'https://github.com/sagarchaaro/FunctionalTesting.git'
-                sh 'java -jar /home/ubuntu/.jenkins/workspace/Testing/testing.jar'
+						sh 'java -jar /home/ubuntu/.jenkins/workspace/Testing/testing.jar'
 					}
 					catch(Exception e){
 						mail bcc: '', body: 'Testing is failed, pls check the logs!!!', cc: '', from: '', replyTo: '', subject: 'Build Failure to Continuous Testing', to: 'aarosagarch@gmail.com'
 					}
 				}
                 
-            }
-        }
-		stage('Continuous_Testing'){
-            steps{
-				script{
-					try{
-						git branch: 'main', url: 'https://github.com/sagarchaaro/FunctionalTesting.git'
-                sh 'java -jar /home/ubuntu/.jenkins/workspace/Testing/testing.jar'
-					}
-					catch(Exception e){
-						mail bcc: '', body: 'Testing is failed, pls check the logs!!!', cc: '', from: '', replyTo: '', subject: 'Build Failure to Continuous Testing', to: 'aarosagarch@gmail.com'
-					}
-				} 
             }
         }
 		stage('Continuous_Delivery'){
