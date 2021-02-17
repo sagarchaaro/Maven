@@ -1,3 +1,4 @@
 class xyz{
-	"This is xyz class"
+	//"This is xyz classs"
+	public static void main(String args[]){}
 }
