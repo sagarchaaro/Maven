@@ -1,3 +1,2 @@
-class hellotest{
-	This is sample hellotest
-}
+class hellotest{	This is sample hellotest
+}i
