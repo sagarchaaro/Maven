@@ -1,0 +1,44 @@
+pipeline
+{
+    agent {node 'master'}
+    stages
+    {
+        stage('ContinuousDownload')    
+        {
+            steps
+            {
+                git 'https://github.com/sagarchaaro/Maven.git'
+            }
+        }
+        stage('ContinuousBuild')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                sh 'scp /var/lib/jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war jenkins@172.31.34.29:/var/lib/tomcat9/webapps/jenkinsdecqa.war'
+            }
+        }
+        stage('ContinuousTesting')
+        {
+            steps
+            {
+                git branch: 'main', url: 'https://github.com/sagarchaaro/FunctionalTesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/DeclarativePipeline/testing.jar'
+            }
+        }
+        stage('ContinuousDelivery')
+        {
+            steps
+            {
+                input message: 'Waiting for Approval from DM!', submitter: 'srinivas'
+                sh 'scp /var/lib/jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war jenkins@172.31.3.228:/var/lib/tomcat9/webapps/jenkinsdecprod.war'
+            }
+        }
+    }
+}
