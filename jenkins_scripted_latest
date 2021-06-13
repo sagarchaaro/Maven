@@ -1,0 +1,21 @@
+node('master') {
+    
+    stage('ContinuousDownload') {
+        git 'https://github.com/sagarchaaro/Snigdha_Dev.git'
+    }
+    stage('ContinuousBuid'){
+        sh 'mvn package'
+    }
+    stage('ConinuousDeployment'){
+        sh 'scp /var/lib/jenkins/workspace/ScriptedPipeline/webapp/target/webapp.war jenkins@172.31.34.29:/var/lib/tomcat9/webapps/jtestapps.war'
+    }
+    stage('ContinuousTesting'){
+        git branch: 'main', url: 'https://github.com/sagarchaaro/FunctionalTesting.git'
+        sh 'java -jar /var/lib/jenkins/workspace/ScriptedPipeline/testing.jar'
+        
+    }
+    stage('ContinuousDelivery'){
+        input message: 'Waiting for Approval from DM!', submitter: 'srinivas'
+        sh 'scp /var/lib/jenkins/workspace/ScriptedPipeline/webapp/target/webapp.war jenkins@172.31.3.228:/var/lib/tomcat9/webapps/aaroapp.war'
+    }
+}
