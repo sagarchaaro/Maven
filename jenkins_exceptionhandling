@@ -1,0 +1,100 @@
+pipeline
+{
+    agent {node 'master'}
+    stages
+    {
+        stage('ContinuousDownload')    
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                         git 'https://github.com/sagarchaaro/Maven.git'
+                    }
+                    catch(Exception e1)
+                    {
+                        mail bcc: '', body: '''Hi Team,
+    Unable to download the code from Git Hub repository,
+    Git Hub Admin Team, please check this asap...!!!
+    Thanks''', cc: '', from: '', replyTo: '', subject: 'Jenkins failure in Continuous Download', to: 'sagarch.aaro@gmail.com'
+                        exit(1)
+                    }
+                }
+               
+            }
+        }
+        stage('ContinuousBuild')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'mvn package'        
+                    }
+                    catch(Exception e2)
+                    {
+                        mail bcc: '', body: 'Maven package getting failed while building the code', cc: '', from: '', replyTo: '', subject: 'Jenkins failure in Continuous Build', to: 'sagarch.aaro@gmail.com'
+                        exit(1)
+                    }
+                }
+                
+            }
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'scp /var/lib/jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war jenkins@172.31.34.29:/var/lib/tomcat9/webapps/jenkinsdecqa.war'        
+                    }
+                    catch(Exception e3){
+                        mail bcc: '', body: 'Artifact is not able to copy into the QA Server Tomcat location', cc: '', from: '', replyTo: '', subject: 'Jenkins failure in Continuous Deployment', to: 'sagarch.aaro@gmail.com'
+                        exit(1)
+                    }
+                }
+                
+            }
+        }
+        stage('ContinuousTesting')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        git branch: 'main', url: 'https://github.com/sagarchaaro/FunctionalTesting.git'
+                        sh 'java -jar /var/lib/jenkins/workspace/DeclarativePipeline/testing.jar'
+                    }
+                    catch(Exception e4)
+                    {
+                        mail bcc: '', body: 'There is a failure in QA Automation scripts', cc: '', from: '', replyTo: '', subject: 'Jenkins failure in Continuous Testing', to: 'sagarch.aaro@gmail.com'
+                        exit(1)
+                    }
+                }
+                
+            }
+        }
+        
+    }
+    
+    post
+    {
+        success
+        {
+             input message: 'Waiting for Approval from DM!', submitter: 'srinivas'
+             sh 'scp /var/lib/jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war jenkins@172.31.3.228:/var/lib/tomcat9/webapps/jenkinsdecprod.war'
+        }
+        failure
+        {
+            mail bcc: '', body: 'One of the stage in Continuous Integration is failed', cc: 'aarosagarch@gmail.com', from: '', replyTo: '', subject: 'Jenkins failure in CI', to: 'sagarch.aaro@gmail.com'
+        }
+    }
+}
